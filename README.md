@@ -9,5 +9,5 @@ You can use readpipe.py to print out the pipes that go to tasbot and replay.
 python readpipe.py replay_pipe
 python readpipe.py tasbot_pipe
 
-Source for bad-words.txt is here:
+Source for bad-words.txt is here, modified for the context of this project:
 https://www.cs.cmu.edu/~biglou/resources/bad-words.txt
