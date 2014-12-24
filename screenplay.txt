@@ -6,5 +6,5 @@
 1 Red Hello from TheAxeBot
 5 Red I am just reading from a simple screenplay text file
 3 Tasbot There are some lines for tasbot too
-1 red I can now filter urls
-3 red and non-ascii text too
+#1 red I can now filter urls
+#3 red and non-ascii text too

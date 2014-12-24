@@ -64,12 +64,12 @@ class ScreenPlayThread(Thread):
         self.ircBot = ircBot
         self.script = []
         self.readScreenPlay(ScreenPlayFileName)
-            
+
     def readScreenPlay(self, filename):
         screenPlayFile = open(filename)
         rawScript = screenPlayFile.readlines()
         screenPlayFile.close()
-        
+
         for line in rawScript:
             #Commented lines with #
             if re.match("\s*#", line):
@@ -86,7 +86,7 @@ class ScreenPlayThread(Thread):
             if text == '':
                 continue
             self.script.append((delay, speaker, text))
-            
+
         return self.script
 
     def run(self):
@@ -112,6 +112,8 @@ class PptIrcBot(irc.client.SimpleIRCClient):
         self.urlregex = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
         self.otherbadregex = re.compile(r'\.((com)|(org)|(net))')
         self.replayQueue = Queue()
+        self.nonPrintingChars = set([chr(i) for i in xrange(32)])
+        self.nonPrintingChars.add(127)
 
     def on_welcome(self, connection, event):
         connection.join(IrcChannel)
@@ -129,45 +131,61 @@ class PptIrcBot(irc.client.SimpleIRCClient):
     def on_disconnect(self, connection, event):
         sys.exit(0)
 
-    #def _dispatcher(self, connection, event):
-        #debug(event.type)
-        #irc.client.SimpleIRCClient._dispatcher(self, connection, event)
+    def naughtyMessage(self, sender, reason):
+        #Be sure to get rid of the naughty message before the event!
+        #An easy way is to just make this function a pass
+        #pass
+        self.connection.privmsg(IrcChannel, "Naughty %s (%s)" % (sender, reason))
 
     def on_pubmsg(self, connection, event):
         debug("pubmsg from %s: %s" % (event.source, event.arguments[0]))
         text = event.arguments[0]
-        words = self.splitter.split(text)
         sender = event.source.split('!')[0]
 
         #Check for non-ascii characters
         try:
             text.decode('ascii')
         except (UnicodeDecodeError, UnicodeEncodeError):
-            self.connection.privmsg(IrcChannel, "Naughty " + sender + " (not ascii)")
+            self.naughtyMessage(sender, "not ascii")
+            return
+        except Exception:
+            #I am not sure what else can happen but just to be safe, reject on other errors
             return
 
         if self.urlregex.search(text):
-            self.connection.privmsg(IrcChannel, "Naughty " + sender + " (url)")
+            self.naughtyMessage(sender, "url")
             return
 
         if self.otherbadregex.search(text):
-            self.connection.privmsg(IrcChannel, "Naughty " + sender + " (url-like)")
+            self.naughtyMessage(sender, "url-like")
             return
 
         #We probably also want to filter some typically non-printing ascii chars:
         #[18:12] <@Ilari> Also, one might want to drop character codes 0-31 and 127. And then map the icons to some of those.
+        if any(c in self.nonPrintingChars for c in text):
+            self.naughtyMessage(sender, "non-printing chars")
+            return
 
-        if any(word in self.badWords for word in words):
-            self.connection.privmsg(IrcChannel, "Naughty " + sender + " (bad word)")
+        words = self.splitter.split(text)
+        if any(word.lower() in self.badWords for word in words):
+            self.naughtyMessage(sender, "bad word")
             return
         self.replayQueue.put(sender + ':' + text)
 
     def getBadWords(self, filename):
+        #Make sure all the entries are lower case
+        #We lower-case the incoming text to make the check case-insensitive
         badWords = open(filename)
-        badWordList = set([word.strip() for word in badWords.readlines()])
+        badWordList = set([word.strip().lower() for word in badWords.readlines()])
+        badWords.close()
+
         if '' in badWordList:
             badWordList.remove('')
-        badWords.close()
+
+        #Add an s to everything on the list and ban that too
+        for badWord in list(badWordList):
+            badWordList.add(badWord + 's')
+
         return badWordList
 
 
