@@ -18,13 +18,17 @@ from Queue import Queue
 def debug(msg):
     print msg
 
-IrcServer = 'irc.freenode.net'
-IrcNick = 'TheAxeBot'
-IrcChannel = '#lsnes'
+settingsFile = open("settings.yaml")
+settings = yaml.load(settingsFile)
+settingsFile.close()
 
-ReplayPipeName = 'replay_pipe'
-TasbotPipeName = 'tasbot_pipe'
-ScreenPlayFileName = 'screenplay.txt'
+IrcServer = settings.get('IrcServer', 'irc.freenode.net')
+IrcNick = settings.get('IrcNick', 'TheAxeBot')
+IrcChannel = settings.get('IrcChannel', '#lsnes')
+
+ReplayPipeName = settings.get('ReplayPipeName', 'replay_pipe')
+TasbotPipeName = settings.get('TasbotPipeName', 'tasbot_pipe')
+ScreenPlayFileName = settings.get('ScreenPlayFileName', 'screenplay.txt')
 
 def writeToPipe(writePipe, msg):
     """Utility function to write a message to a pipe.

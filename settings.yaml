@@ -1,0 +1,9 @@
+#Settings for IRC bot
+
+IrcServer:  irc.freenode.net
+IrcNick:    TheAxeBot
+IrcChannel: "#lsnes"
+
+ReplayPipeName:     replay_pipe
+TasbotPipeName:     tasbot_pipe
+ScreenPlayFileName: screenplay.txt
