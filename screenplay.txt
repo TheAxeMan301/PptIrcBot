@@ -1,0 +1,10 @@
+#This is the screenplay file
+#Format is delay after previous line in seconds, speaker, line
+#The speaker can be red or tasbot and it is case insensitive so feel free to use TasBot or Tasbot or whatever
+#Whitespace between those three items is ignored but whitespace in text is preserved
+#And of course any lines starting with # are comments
+1 Red Hello from TheAxeBot
+5 Red I am just reading from a screenplay-like script here
+3 Tasbot There are some lines for tasbot too
+1 red I can now filter urls
+3 red and non-ascii text too
