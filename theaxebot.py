@@ -63,6 +63,7 @@ class ScreenPlayThread(Thread):
 
         self.ircBot = ircBot
         self.script = []
+        self.readScreenPlay(ScreenPlayFileName)
             
     def readScreenPlay(self, filename):
         screenPlayFile = open(filename)
@@ -85,6 +86,8 @@ class ScreenPlayThread(Thread):
             if text == '':
                 continue
             self.script.append((delay, speaker, text))
+            
+        return self.script
 
     def run(self):
         if not os.path.exists(TasbotPipeName):
