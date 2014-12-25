@@ -1,8 +1,9 @@
 #Settings for IRC bot
 
-IrcServer:  irc.freenode.net
-IrcNick:    TheAxeBot
-IrcChannel: "#lsnes"
+IrcServer:      irc.freenode.net
+IrcNick:        TheAxeBot
+IrcPassword:    passwd
+IrcChannel:     "#lsnes"
 
 ReplayPipeName:     replay_pipe
 TasbotPipeName:     tasbot_pipe

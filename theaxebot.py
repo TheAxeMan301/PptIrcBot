@@ -24,6 +24,7 @@ settingsFile.close()
 
 IrcServer = settings.get('IrcServer', 'irc.freenode.net')
 IrcNick = settings.get('IrcNick', 'TheAxeBot')
+IrcPassword = settings.get('IrcPassword', None)
 IrcChannel = settings.get('IrcChannel', '#lsnes')
 
 ReplayPipeName = settings.get('ReplayPipeName', 'replay_pipe')
@@ -208,7 +209,7 @@ def main():
     c = PptIrcBot()
 
     try:
-        c.connect(server, port, IrcNick)
+        c.connect(server, port, IrcNick, password=IrcPassword)
     except irc.client.ServerConnectionError as x:
         print(x)
         sys.exit(1)
