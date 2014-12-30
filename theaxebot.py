@@ -9,6 +9,7 @@ import os
 import time
 from threading import Thread
 from Queue import Queue
+from subprocess import call
 
 #Setting the global logger to debug gets all sorts of irc debugging
 #logging.getLogger().setLevel(logging.DEBUG)
@@ -17,6 +18,7 @@ from Queue import Queue
 #from logging import debug
 def debug(msg):
     print msg
+#debug = logging.critical
 
 settingsFile = open("settings.yaml")
 settings = yaml.load(settingsFile)
@@ -30,6 +32,10 @@ IrcChannel = settings.get('IrcChannel', '#lsnes')
 ReplayPipeName = settings.get('ReplayPipeName', 'replay_pipe')
 TasbotPipeName = settings.get('TasbotPipeName', 'tasbot_pipe')
 ScreenPlayFileName = settings.get('ScreenPlayFileName', 'screenplay.txt')
+
+TasbotPipeEnable = settings.get('TasbotPipeEnable', False)
+TasbotEspeakEnable = settings.get('ScreenPlayFileName', True)
+
 
 def writeToPipe(writePipe, msg):
     """Utility function to write a message to a pipe.
@@ -95,17 +101,22 @@ class ScreenPlayThread(Thread):
         return self.script
 
     def run(self):
-        if not os.path.exists(TasbotPipeName):
-            os.mkfifo(TasbotPipeName)
-        tasBotPipe = open(TasbotPipeName, 'w')
+        if TasbotPipeEnable:
+            if not os.path.exists(TasbotPipeName):
+                os.mkfifo(TasbotPipeName)
+            tasBotPipe = open(TasbotPipeName, 'w')
 
         for delay, speaker, text in self.script:
             time.sleep(delay)
+            #debug("%s says %s" % (speaker, text))
             if speaker == 'red':
                 self.ircBot.replayQueue.put("<red>:" + text)
                 self.ircBot.connection.privmsg(IrcChannel, text)
             if speaker == 'tasbot':
-                writeToPipe(tasBotPipe, text)
+                if TasbotPipeEnable:
+                    writeToPipe(tasBotPipe, text)
+                if TasbotEspeakEnable:
+                    call(['espeak', text])
 
 
 class PptIrcBot(irc.client.SimpleIRCClient):

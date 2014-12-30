@@ -8,3 +8,8 @@ IrcChannel:     "#lsnes"
 ReplayPipeName:     replay_pipe
 TasbotPipeName:     tasbot_pipe
 ScreenPlayFileName: screenplay.txt
+
+#If true then tasbot's lines are written to tasbotpipe
+TasbotPipeEnable:   false
+#If true then tasbot's lines are read with espeak
+TasbotEspeakEnable: true
