@@ -5,19 +5,21 @@ import re
 from threading import Thread
 from Queue import Queue
 
+def debug(msg):
+    print msg
+
 """
 Bitstream format:
 
 0xxxxxyyyyyzzzzz - Three characters * 5 bits each for chat
-1xxxxxxx0yyyyyyy - Two chars * 7 bits each in normal ascii encoding
+1xxxxxxx0yyyyyyy - Two chars * 7 bits for a more extended char set.
                    The second char is for Red.
 1xxxxxxx1yyyyyyy - One char and a command. The command might cause some
                    following input to be treated differently.
 
 The 5 bit character mapping:
-(This is TheAxeMan's suggestion, see below for my reasoning)
 
-0  (no char)    16 p
+0  (newline)    16 p
 1  a            17 q
 2  b            18 r
 3  c            19 s
@@ -32,7 +34,7 @@ The 5 bit character mapping:
 12 l            28 ? (question mark)
 13 m            29 ! (exclamation mark)
 14 n            30 : (colon)
-15 o            31 (newline)
+15 o            31 .
 
 The all zeros no char allows 0x0000 to be a full no-op. Also allows for
 using 1 or 2 of the 3 allowed.
@@ -58,67 +60,355 @@ The next 16 bits are an emote according to some mapping we make.
 Then go back to text as normal.
 """
 
-NopBits = 0x0000
 HighBitSet = 2 ** 15
+NopBits = HighBitSet
+
+#************************
+#*  Character mappings  *
+#************************
 
 def makeFiveBitMap():
     """Set the mapping for the 5 bit chars"""
     mapping = {}
-    #a-z are 1-26 (0 is null)
+    #a-z are 1-26
     for i in xrange(ord('a'), ord('z')+1):
         mapping[chr(i)] = 1 + i - ord('a')
     mapping.update({
+        '\n': 0,
         ' ': 27,
         '?': 28,
         '!': 29,
         ':': 30,
-        '\n': 31,
+        '.': 31,
     })
     return mapping
 
 FiveBitMapping = makeFiveBitMap()
 
+def makeEmoteMaps():
+    #These are simpler emotes. Tracked separately because the parsing is slightly different.
+    RobotEmoteList = [
+        ':)',
+        ':(',
+        ':o',
+        ':z',
+        'B)',
+        ':/',
+        ';)',
+        ';p',
+        ':p',
+        'R)',
+        'o_O',
+        ':D',
+        '>(',
+        '<3',
+    ]
+    #Mapping will be 0-13 in the order of this list
+    RobotEmoteMap = dict([(RobotEmoteList[i], i) for i in xrange(len(RobotEmoteList))])
 
-def charIsSupported(c):
-    """Is the character supported? Filter non-printing or maybe other chars"""
-    #For now no filtering
-    return True
+    #Face emotes that we have actually converted.
+    #Other face emotes will be parsed but mapped to some other face.
+    FaceEmoteList = [
+        'Kappa',
+        'FrankerZ',
+        'ResidentSleeper',
+        'FailFish',
+        'KreyGasm',
+        'PogChamp',
+        'SwiftRage',
+        'PJSalt',
+        'BibleThump',
+        'WinWaker',
+    ]
+    #Mapping will be 14-24 in the order of this list
+    FaceEmoteMap = dict([(FaceEmoteList[i], i+len(RobotEmoteList)) for i in xrange(len(FaceEmoteList))])
+
+    #Read all the emotes from a text file
+    twitchEmoteFile = open('twitchemotes.txt')
+    allFaceEmotes = [emote.strip() for emote in twitchEmoteFile.readlines()]
+    twitchEmoteFile.close()
+    for emote in allFaceEmotes:
+        if len(emote) > 0 and emote not in FaceEmoteMap:
+            #This sets the default
+            FaceEmoteMap[emote] = FaceEmoteMap['Kappa']
+
+    return RobotEmoteMap, FaceEmoteMap
+
+RobotEmoteMap, FaceEmoteMap = makeEmoteMaps()
+
+def makeSevenBitMapping():
+    """Mapping for 7 bit chars, including emotes"""
+    #0 is a non-printing null
+    #Then 1-96 in the order of this string
+    legalChars = list('!"#$%&\'()*+,-./0123456789:;,=.?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ \n')
+    mapping = dict([(legalChars[i], i+1) for i in xrange(len(legalChars))])
+
+    #Now add in emotes
+    #Robot emotes have an index from 0-13. That gets mapped to 97-110 in this map.
+    for emote in RobotEmoteMap:
+        mapping[emote] = 97 + RobotEmoteMap[emote]
+    #Face emotes have an index from 14-24. That gets mapped to 111-121 in this map.
+    for emote in FaceEmoteMap:
+        mapping[emote] = 97 + FaceEmoteMap[emote]
+
+    return mapping
+
+SevenBitMapping = makeSevenBitMapping()
+
+#************************
+#*  Encoding functions  *
+#************************
 
 def encodeThreeChars(c1=None, c2=None, c3=None):
     """Get the 16-bit encoding for up to three characters"""
     n1 = FiveBitMapping.get(c1, 0)
     n2 = FiveBitMapping.get(c2, 0)
     n3 = FiveBitMapping.get(c3, 0)
-    return n1 << 10 + n2 << 5 + n3
+    return (n1 << 10) + (n2 << 5) + n3
 
 def encodeRedChar(redChar):
     """Encode a char for red's text"""
-    if ord(redChar) < 128:
-        return HighBitSet + ord(redChar)
-    return HighBitSet
+    return HighBitSet + SevenBitMapping.get(redChar, 0)
 
 def encodeChatChar(chatChar):
     """Encode a single chat char in ascii"""
-    if ord(chatChar) < 128:
-        return HighBitSet + ord(chatChar) << 7
-    return HighBitSet
+    return HighBitSet + (SevenBitMapping.get(chatChar) << 7)
 
 def encodeTwoChars(chatChar=None, redChar=None):
     """Encode two characters, one for chat and one for Red.
        Both are optional.
     """
-    bits = HighBitSet  #this is 2**15 so set bit 16
-    #Sanity check: ensure char code is 7 bits
-    if chatChar is not None and ord(chatChar) < 128:
-        bits += ord(chatChar) << 7
-    if redChar is not None and ord(redChar) < 128:
-        bits += ord(redChar)
-    return bits
+    return HighBitSet + (SevenBitMapping.get(chatChar, 0) << 7) + SevenBitMapping.get(redChar, 0)
 
+
+class TextPipeHandler(Thread):
+    """Reads the input from the replay pipe and adds to the line queues.
+       Decides when to drop chat if it gets too backed up.
+    """
+    def __init__(self, chatQueue, redQueue, pipeName):
+        super(TextPipeHandler, self).__init__()
+
+        self.chatQueue = chatQueue
+        self.redQueue = redQueue
+
+        if not os.path.exists(pipeName):
+            os.mkfifo(pipeName)
+        self.readPipe = open(pipeName, 'r')
+
+    def readNextLine(self):
+        """Read the next line, halting everything until something comes"""
+        while True:
+            line = self.readPipe.readline()
+            #If we read from flushed pipe then wait a moment before moving on
+            if line == '':
+                time.sleep(0.1)
+                continue
+            return line.rstrip('\n')
+
+    def run(self):
+        """Listen on the pipe. On reading something add it to the appropriate queue"""
+        while True:
+            line = self.readNextLine()
+            if line.startswith('<red>'):
+                debug('line for Red: ' + line)
+                self.redQueue.put(line)
+            #Check the number of chat lines queued up. Drop this one if there are too many.
+            elif self.chatQueue.qsize() < 20:
+                debug('chat line: ' + line)
+                self.chatQueue.put(line)
+
+
+class BitStreamer(object):
+    """Manages the stream of commands to send"""
+    def __init__(self, pipeName=None):
+        self.chatQueue = Queue()
+        self.redQueue = Queue()
+
+        #If we got a pipe name then start the pipe handler thread
+        #It will add to the queues as it reads text from chat
+        if pipeName is not None:
+            pipeThread = TextPipeHandler(self.chatQueue, self.redQueue, pipeName)
+            pipeThread.start()
+
+        #Translate next line into a list of chars or emotes to send
+        self.chatChars = []
+        self.redChars = []
+
+        #Number of inputs until another char from red
+        self.redCooldown = 0
+
+        #Here we compile a massive regex that finds all robot emotes
+        robotEmotes = RobotEmoteMap.keys()
+        #Parens need special handling in regexes
+        robotEmotes = [re.sub('\(', '\(', emote) for emote in robotEmotes]
+        robotEmotes = [re.sub('\)', '\)', emote) for emote in robotEmotes]
+        #Non-capturing parentheses
+        robotEmotes = ['(?:' + emote + ')' for emote in robotEmotes]
+        self.robotEmoteRegex = re.compile('|'.join(robotEmotes))
+
+        self.tokenizeRegex = re.compile("[^A-Za-z0-9_@]+")
+
+    def readRedQueue(self):
+        """Grab a line of red's text"""
+        if self.redQueue.empty():
+            return
+        #Red's lines just have the text
+        text = self.redQueue.get().rstrip('\n')
+        self.redChars = self.parseLine(text) + ['\n']
+        debug("Parsed red line: " + str(self.chatChars))
+
+    def readChatQueue(self):
+        """Grab a line of chat text"""
+        if self.chatQueue.empty():
+            return
+        #Full line should have nick:text. Need to split that up because
+        #nick does not get emotes
+        line = self.chatQueue.get()
+        nick = line.split(':')[0]
+        #Ensure exactly one newline at end. Strip any off the right and add one back.
+        text = line[len(nick)+1:].rstrip('\n')
+        self.chatChars = [c for c in nick if c in SevenBitMapping] + [':', ' '] + self.parseLine(text) + ['\n']
+        debug("Parsed chat line: " + str(self.chatChars))
+
+    def parseLine(self, line):
+        """Parse a line into list of chars and emotes"""
+        #First parse out any robot emotes
+        robotEmotes = self.robotEmoteRegex.findall(line)
+
+        #With no robot emotes skip to parsing for face emotes
+        if len(robotEmotes) == 0:
+            return self.parseLineFace(line)
+
+        #Otherwise we have n robot emotes separating n+1 sections of text
+        sections = self.robotEmoteRegex.split(line)
+
+        #Sanity check...want to be defensive here
+        if len(sections) != len(robotEmotes) + 1:
+            return self.parseLineFace(line)
+
+        parsedLine = []
+        for i in xrange(len(sections)):
+            parsedLine += self.parseLineFace(sections[i])
+            if i < len(robotEmotes):
+                parsedLine.append(robotEmotes[i])
+        return parsedLine
+
+    def parseLineFace(self, line):
+        """Parse a line for face emotes. Also remove any unsupported chars.
+           Does not sort out 5-bit encodable chars yet.
+        """
+        spaces = self.tokenizeRegex.findall(line)
+        words = self.tokenizeRegex.split(line)
+
+        #sanity...
+        if len(spaces) + 1 != len(words):
+            return [c.lower() for c in line if c in SevenBitMapping]
+
+        parsedLine = []
+        for i in xrange(len(words)):
+            word = words[i]
+            if word in FaceEmoteMap:
+                #Emote is treated like a single character
+                parsedLine.append(word)
+            else:
+                #Other text gets split into chars. Invalid chars screened out.
+                #Convert to lowercase too.
+                parsedLine += [c.lower() for c in word if c in SevenBitMapping]
+            if i < len(spaces):
+                parsedLine += [c.lower() for c in spaces[i] if c in SevenBitMapping]
+        return parsedLine
+
+    def getBitsToSend(self):
+        """Check our char queues and get the bits to send"""
+
+        #First see if we have chars for red
+        if len(self.redChars) > 0:
+            if self.redCooldown == 0:
+                #Set cooldown - This is what slows down red's typing.
+                self.redCooldown = 4
+                if len(self.chatChars) == 0:
+                    #no chat char
+                    debug("One char for Red: '%s'" % (self.redChars[0],))
+                    return encodeRedChar(self.redChars.pop(0))
+                else:
+                    #include a chat char
+                    debug("Chat: '%s' Red: '%s'" % (self.chatChars[0], self.redChars[0],))
+                    return encodeTwoChars(
+                        self.chatChars.pop(0),
+                        self.redChars.pop(0))
+            else:
+                self.redCooldown -= 1
+
+        #Chat chars only. Figure out how many of next chars are 5-bit encodable.
+        #If at least two then we use the compact format.
+        if len(self.chatChars) >= 2 and \
+           self.chatChars[0] in FiveBitMapping and \
+           self.chatChars[1] in FiveBitMapping:
+            c1 = self.chatChars.pop(0)
+            c2 = self.chatChars.pop(0)
+
+            #See if we can go for three
+            if len(self.chatChars) > 0 and self.chatChars[0] in FiveBitMapping:
+                debug("Three 5-bit chars: '%s' '%s' '%s'" % (c1, c2, self.chatChars[0]))
+                return encodeThreeChars(c1, c2, self.chatChars.pop(0))
+            #Just two, last will be empty
+            debug("Two 5-bit chars: '%s' '%s'" % (c1, c2))
+            return encodeThreeChars(c1, c2)
+
+        #Send a chat char if one is available
+        if len(self.chatChars) > 0:
+            debug("One 7-bit char: '%s'" % (self.chatChars[0]))
+            return encodeChatChar(self.chatChars.pop(0))
+
+        #Default to no-op
+        return NopBits
+
+    def getNextBits(self):
+        """Send the next set of bits based on incoming text.
+           Red's chat gets priority. We can send a chat char with his.
+        """
+        #If we have no text from chat or red see if there is more
+        #available in the Queue
+        if len(self.chatChars) == 0:
+            self.readChatQueue()
+        if len(self.redChars) == 0:
+            self.readRedQueue()
+
+        #This is the stream that goes to replay
+        return self.getBitsToSend()
+
+
+def decodeBits(bits):
+    """Debugging decode of 16 bits. Convert to binary string e.g. 00111011011010101010"""
+    return format(bits, '#018b')[2:]
+
+class BitStreamerTestThread(Thread):
+    """Tests the BitStreamer by printing out its output"""
+    def __init__(self, bs):
+        super(BitStreamerTestThread, self).__init__()
+        self.bs = bs
+
+    def run(self):
+        #For testing we grab an stream input every 1/10 of a second
+        for i in xrange(1000):
+            time.sleep(0.1)
+            print decodeBits(self.bs.getNextBits())
 
 
 def main():
     """For testing, display control output"""
+
+    #Test with input from writepipe
+    if True:
+        bs = BitStreamer('pipe_test')
+        BitStreamerTestThread(bs).start()
+
+    #Test some other code
+    if False:
+        bs = BitStreamer()
+        print bs.parseLine('>>>Hello :)Kappa__ UnSane')
+        print decodeBits(bs.getNextBits())
+
 
 if __name__ == "__main__":
     main()
