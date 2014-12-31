@@ -140,7 +140,7 @@ def makeSevenBitMapping():
     """Mapping for 7 bit chars, including emotes"""
     #0 is a non-printing null
     #Then 1-96 in the order of this string
-    legalChars = list('!"#$%&\'()*+,-./0123456789:;,=.?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ \n')
+    legalChars = list('\nabcdefghijklmnopqrstuvwxyz ?!:."#$%&\'()*+,-./0123456789;,=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{|}~')
     mapping = dict([(legalChars[i], i+1) for i in xrange(len(legalChars))])
 
     #Now add in emotes
