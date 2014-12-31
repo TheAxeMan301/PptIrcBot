@@ -60,8 +60,11 @@ The next 16 bits are an emote according to some mapping we make.
 Then go back to text as normal.
 """
 
+#This is 10000000 0000000, 16 bits with just the high bit set
 HighBitSet = 2 ** 15
-NopBits = HighBitSet
+
+#The 7-bit encoding for null character
+NullCharCode = 127
 
 #************************
 #*  Character mappings  *
@@ -168,17 +171,20 @@ def encodeThreeChars(c1=None, c2=None, c3=None):
 
 def encodeRedChar(redChar):
     """Encode a char for red's text"""
-    return HighBitSet + SevenBitMapping.get(redChar, 0)
+    return HighBitSet + SevenBitMapping.get(redChar, NullCharCode)
 
 def encodeChatChar(chatChar):
     """Encode a single chat char in ascii"""
-    return HighBitSet + (SevenBitMapping.get(chatChar) << 7)
+    return HighBitSet + (SevenBitMapping.get(chatChar, NullCharCode) << 8)
 
 def encodeTwoChars(chatChar=None, redChar=None):
     """Encode two characters, one for chat and one for Red.
        Both are optional.
     """
-    return HighBitSet + (SevenBitMapping.get(chatChar, 0) << 7) + SevenBitMapping.get(redChar, 0)
+    return HighBitSet + (SevenBitMapping.get(chatChar, NullCharCode) << 8) + SevenBitMapping.get(redChar, NullCharCode)
+
+#A no-op is two null chars
+NopBits = encodeTwoChars()
 
 
 class TextPipeHandler(Thread):
@@ -255,7 +261,7 @@ class BitStreamer(object):
         #Red's lines just have the text
         text = self.redQueue.get().rstrip('\n')
         self.redChars = self.parseLine(text) + ['\n']
-        debug("Parsed red line: " + str(self.chatChars))
+        debug("Parsed red line: " + str(self.redChars))
 
     def readChatQueue(self):
         """Grab a line of chat text"""
