@@ -138,10 +138,9 @@ RobotEmoteMap, FaceEmoteMap = makeEmoteMaps()
 
 def makeSevenBitMapping():
     """Mapping for 7 bit chars, including emotes"""
-    #0 is a non-printing null
-    #Then 1-96 in the order of this string
+    #0-96 in the order of this string
     legalChars = list('\nabcdefghijklmnopqrstuvwxyz ?!:."#$%&\'()*+,-./0123456789;,=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{|}~')
-    mapping = dict([(legalChars[i], i+1) for i in xrange(len(legalChars))])
+    mapping = dict([(legalChars[i], i) for i in xrange(len(legalChars))])
 
     #Now add in emotes
     #Robot emotes have an index from 0-13. That gets mapped to 97-110 in this map.
@@ -150,6 +149,7 @@ def makeSevenBitMapping():
     #Face emotes have an index from 14-24. That gets mapped to 111-121 in this map.
     for emote in FaceEmoteMap:
         mapping[emote] = 97 + FaceEmoteMap[emote]
+    #127 is a non-printing null (no-op)
 
     return mapping
 
