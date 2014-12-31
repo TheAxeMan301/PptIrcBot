@@ -21,3 +21,7 @@ writing to. The BitStreamer will launch an async I/O thread to manage that
 interface. The replay code should use the getNextBits() method to get the chat
 input. The result will be a 16-bit integer encoded as described at the top of
 that file. If there is nothing incoming from chat then the result is a no-op.
+
+To run a test, open a terminal and run 'python writepipe.py'.
+In a separate terminal run 'python pptcontrol.py'. It should print
+out a stream of input with some debugging.
