@@ -36,8 +36,6 @@ The 5 bit character mapping:
 14 n            30 : (colon)
 15 o            31 .
 
-The all zeros no char allows 0x0000 to be a full no-op. Also allows for
-using 1 or 2 of the 3 allowed.
 Alphabet and space should be obvious. We can convert text to lowercase.
 colon is there because it comes after every nick
 newline is there to end each line
@@ -55,9 +53,6 @@ Red speaks we can send one char of normal chat and one char for Red.
 
 What about the commands? At the very least we need a command for emotes.
 Let's call the 7 bits the opcode.
-First guess is to say opcode 0000001 means the next input is an emote.
-The next 16 bits are an emote according to some mapping we make.
-Then go back to text as normal.
 """
 
 #This is 10000000 0000000, 16 bits with just the high bit set
