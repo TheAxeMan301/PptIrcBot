@@ -123,6 +123,7 @@ def makeEmoteMaps():
         'PJSalt',
         'BibleThump',
         'WinWaker',
+        'SomeFace',  # FIXME Placeholder
     ]
     #Mapping will be 14-24 in the order of this list
     FaceEmoteMap = dict([(FaceEmoteList[i], i + len(RobotEmoteList)) for i in xrange(len(FaceEmoteList))])
