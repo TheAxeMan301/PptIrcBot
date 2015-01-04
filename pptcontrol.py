@@ -144,7 +144,7 @@ RobotEmoteMap, FaceEmoteMap = makeEmoteMaps()
 def makeSevenBitMapping():
     """Mapping for 7 bit chars, including emotes"""
     #0-96 in the order of this string
-    legalChars = list('\nabcdefghijklmnopqrstuvwxyz ?!:."#$%&\'()*+,-./0123456789;,=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{|}~')
+    legalChars = list('\nabcdefghijklmnopqrstuvwxyz ?!:."#$%&\\\'()*+,-./0123456789;,=@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{|}~')
     mapping = dict([(legalChars[i], i) for i in xrange(len(legalChars))])
 
     #Now add in emotes
