@@ -328,20 +328,19 @@ class BitStreamer(object):
 
         #sanity...
         if len(spaces) + 1 != len(words):
-            return [c.lower() for c in line if c in SevenBitMapping]
+            return [c for c in line if c in SevenBitMapping]
 
         parsedLine = []
         for i in xrange(len(words)):
             word = words[i]
             if word in FaceEmoteMap:
-                #Emote is treated like a single character
+                # Emote is treated like a single character
                 parsedLine.append(word)
             else:
-                #Other text gets split into chars. Invalid chars screened out.
-                #Convert to lowercase too.
-                parsedLine += [c.lower() for c in word if c in SevenBitMapping]
+                # Other text gets split into chars. Invalid chars screened out.
+                parsedLine += [c for c in word if c in SevenBitMapping]
             if i < len(spaces):
-                parsedLine += [c.lower() for c in spaces[i] if c in SevenBitMapping]
+                parsedLine += [c for c in spaces[i] if c in SevenBitMapping]
         return parsedLine
 
     def getBitsToSend(self):
