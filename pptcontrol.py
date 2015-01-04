@@ -127,9 +127,8 @@ def makeEmoteMaps():
     FaceEmoteMap = dict([(FaceEmoteList[i], i + len(RobotEmoteList)) for i in xrange(len(FaceEmoteList))])
 
     #Read all the emotes from a text file
-    twitchEmoteFile = open('twitchemotes.txt')
-    allFaceEmotes = [emote.strip() for emote in twitchEmoteFile.readlines()]
-    twitchEmoteFile.close()
+    with open('twitchemotes.txt') as twitchEmoteFile:
+        allFaceEmotes = [emote.strip() for emote in twitchEmoteFile.readlines()]
     for emote in allFaceEmotes:
         if len(emote) > 0 and emote not in FaceEmoteMap:
             #This sets the default
@@ -250,14 +249,11 @@ class BitStreamer(object):
         #Number of inputs until another char from red
         self.redCooldown = 0
 
-        #Here we compile a massive regex that finds all robot emotes
-        robotEmotes = RobotEmoteMap.keys()
-        #Parens need special handling in regexes
-        robotEmotes = [re.sub('\(', '\(', emote) for emote in robotEmotes]
-        robotEmotes = [re.sub('\)', '\)', emote) for emote in robotEmotes]
-        #Non-capturing parentheses
-        robotEmotes = ['(?:' + emote + ')' for emote in robotEmotes]
-        self.robotEmoteRegex = re.compile('|'.join(robotEmotes))
+        # Here we compile a massive regex that finds all robot emotes.  Note
+        # that they must be in reverse-sorted order so that the longest prefix
+        # is matched in the case of overlap.
+        robotEmotes = map(re.escape, sorted(RobotEmoteMap.keys(), reverse=True))
+        self.robotEmoteRegex = re.compile('(?:' + '|'.join(robotEmotes) + ')')
 
         self.tokenizeRegex = re.compile("[^A-Za-z0-9_@]+")
 
