@@ -1,0 +1,65 @@
+#This is the screenplay file
+#Format is delay after previous line in seconds, speaker, line
+#The speaker can be red or tasbot and it is case insensitive so feel free to use TasBot or Tasbot or whatever
+#Whitespace between those three items is ignored but whitespace in text is preserved
+#And of course any lines starting with # are comments
+1    TASBot: I am TASBot. Hello, A G D Q 2015!
+14 dwangoAC: Hi, TASBot!
+4    TASBot: I like to play games.
+6  dwangoAC: I bet you do. What game would you like to play today?
+8    TASBot: Pokemon plays Twitch.
+5  dwangoAC: I think you mean Twitch plays Pokemon.
+6    TASBot: I will make RED play.
+4  dwangoAC: Make?
+8       RED: I am RED. Hello, AGDQ 2015!
+5  dwangoAC: TASBot, what are you doing?
+5    TASBot: Joining Twitch chat.
+5  dwangoAC: TASBot, are you sure joining twitch chat is a good idea?
+5    TASBot: RED, it is time for you to play.
+5       RED: Hello, Twitch chat!
+7  dwangoAC: Wait, back up - how can Pokemon play Twitch?
+5       RED: Twitch chat, everyone spam FrankerZ!
+5       RED: You can do better, show me your FrankerZ
+7  dwangoAC: What are you doing, RED?
+5       RED: I need more FrankerZ!
+10      RED: They did it!
+1       RED: I just totally played Twitch!
+5    TASBot: That is a good way to play, RED.
+3  dwangoAC: I'm not so sure about that.
+3       RED: I like this game.
+1       RED: It is comfy and easy to wear.
+8  dwangoAC: That doesn't even make sense.
+5    TASBot: Make Twitch chat do another trick.
+3       RED: No.
+2    TASBot: No?
+1       RED: Twitch chat is not yet trained well enough.
+5    TASBot: Make Twitch chat do a trick now!
+3  dwangoAC: I'm staying out of this.
+3       RED: Okay. I will consult the Helix Fossil.
+7       RED: Hey, Twitch chat! Tell TASBot to be happy.
+5    TASBot: I do not understand this word "Happy".
+3       RED: Twith chat just totally played TASBot!
+5       RED: Training Twitch Chat was super effective!
+5    TASBot: I did not like that trick.
+3  dwangoAC: TASBot, how can you like and dislike things but not know how to be happy?
+5       RED: TASBot is broken, he does not understand emotion.
+5    TASBot: I am perfect. Everything I do must be perfect.
+5       RED: Oh yeah? Go look at TASVideos.org
+5       RED: I bet *something* there isn't perfect.
+5    TASBot: This site not perfect. There is too much purple.
+5       RED: And what are you going to do about it, bugeyes?
+5    TASBot: I will make it perfect.
+3  dwangoAC: But I like the site the way it is!
+5    TASBot: I made it perfect.
+5       RED: No you didn't, you made it ugly.
+3  dwangoAC: How did you do that to the real site?
+5       RED: Twitch chat, what color should the site be?
+5    TASBot: I like this color.
+5       RED: Do what Twitch chat wants.
+5    TASBot: No.
+5       RED: No?
+3  dwangoAC: Can't you two come to some kind of compromise?
+5       RED: Tell TASBot what color it should be!
+5    TASBot: It will not be perfect. You will see.
+5       RED: That looks like anarchy in action.
+3  dwangoAC: Thanks you two, now the site looks like a rainbow threw up on it.
