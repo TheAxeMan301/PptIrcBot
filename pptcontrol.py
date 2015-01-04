@@ -367,7 +367,7 @@ class BitStreamer(object):
             c2 = self.chatChars.pop(0)
             c3 = self.chatChars.pop(0)
 
-            debug("Three 5-bit chars: %r %r" % (c1, c2, c3))
+            debug("Three 5-bit chars: %r %r %r" % (c1, c2, c3))
             return encodeThreeChars(c1, c2, c3)
 
         #Send a chat char if one is available
