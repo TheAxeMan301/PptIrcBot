@@ -1,12 +1,13 @@
-import sys
 import os
 import time
 import re
 from threading import Thread
 from Queue import Queue
 
+
 def debug(msg):
     print msg
+
 
 """
 Bitstream format:
@@ -61,15 +62,17 @@ HighBitSet = 2 ** 15
 #The 7-bit encoding for null character
 NullCharCode = 127
 
+
 #************************
 #*  Character mappings  *
 #************************
+
 
 def makeFiveBitMap():
     """Set the mapping for the 5 bit chars"""
     mapping = {}
     #a-z are 1-26
-    for i in xrange(ord('a'), ord('z')+1):
+    for i in xrange(ord('a'), ord('z') + 1):
         mapping[chr(i)] = 1 + i - ord('a')
     mapping.update({
         '\n': 0,
@@ -81,7 +84,9 @@ def makeFiveBitMap():
     })
     return mapping
 
+
 FiveBitMapping = makeFiveBitMap()
+
 
 def makeEmoteMaps():
     #These are simpler emotes. Tracked separately because the parsing is slightly different.
@@ -119,7 +124,7 @@ def makeEmoteMaps():
         'WinWaker',
     ]
     #Mapping will be 14-24 in the order of this list
-    FaceEmoteMap = dict([(FaceEmoteList[i], i+len(RobotEmoteList)) for i in xrange(len(FaceEmoteList))])
+    FaceEmoteMap = dict([(FaceEmoteList[i], i + len(RobotEmoteList)) for i in xrange(len(FaceEmoteList))])
 
     #Read all the emotes from a text file
     twitchEmoteFile = open('twitchemotes.txt')
@@ -132,7 +137,9 @@ def makeEmoteMaps():
 
     return RobotEmoteMap, FaceEmoteMap
 
+
 RobotEmoteMap, FaceEmoteMap = makeEmoteMaps()
+
 
 def makeSevenBitMapping():
     """Mapping for 7 bit chars, including emotes"""
@@ -157,6 +164,7 @@ SevenBitMapping = makeSevenBitMapping()
 #*  Encoding functions  *
 #************************
 
+
 def encodeThreeChars(c1=None, c2=None, c3=None):
     """Get the 16-bit encoding for up to three characters"""
     n1 = FiveBitMapping.get(c1, 0)
@@ -164,13 +172,16 @@ def encodeThreeChars(c1=None, c2=None, c3=None):
     n3 = FiveBitMapping.get(c3, 0)
     return (n1 << 10) + (n2 << 5) + n3
 
+
 def encodeRedChar(redChar):
     """Encode a char for red's text"""
     return HighBitSet + SevenBitMapping.get(redChar, NullCharCode)
 
+
 def encodeChatChar(chatChar):
     """Encode a single chat char in ascii"""
     return HighBitSet + (SevenBitMapping.get(chatChar, NullCharCode) << 8)
+
 
 def encodeTwoChars(chatChar=None, redChar=None):
     """Encode two characters, one for chat and one for Red.
@@ -178,7 +189,8 @@ def encodeTwoChars(chatChar=None, redChar=None):
     """
     return HighBitSet + (SevenBitMapping.get(chatChar, NullCharCode) << 8) + SevenBitMapping.get(redChar, NullCharCode)
 
-#A no-op is two null chars
+
+# A no-op is two null chars
 NopBits = encodeTwoChars()
 
 
@@ -267,7 +279,7 @@ class BitStreamer(object):
         line = self.chatQueue.get()
         nick = line.split(':')[0]
         #Ensure exactly one newline at end. Strip any off the right and add one back.
-        text = line[len(nick)+1:].rstrip('\n')
+        text = line[len(nick) + 1:].rstrip('\n')
         self.chatChars = [c for c in nick if c in SevenBitMapping] + [':', ' '] + self.parseLine(text) + ['\n']
         debug("Parsed chat line: " + str(self.chatChars))
 
@@ -382,6 +394,7 @@ class BitStreamer(object):
 def decodeBits(bits):
     """Debugging decode of 16 bits. Convert to binary string e.g. 00111011011010101010"""
     return format(bits, '#018b')[2:]
+
 
 class BitStreamerTestThread(Thread):
     """Tests the BitStreamer by printing out its output"""
