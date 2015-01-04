@@ -359,7 +359,7 @@ class BitStreamer(object):
         # Chat chars only. Figure out how many of next chars are 5-bit
         # encodable.  If all three of them then we use the compact
         # format.
-        if (len(self.chatChars) == 3 and
+        if (len(self.chatChars) >= 3 and
                 self.chatChars[0] in FiveBitMapping and
                 self.chatChars[1] in FiveBitMapping and
                 self.chatChars[2] in FiveBitMapping):
