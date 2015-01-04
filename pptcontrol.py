@@ -320,8 +320,14 @@ class BitStreamer(object):
         return parsedLine
 
     def parseLineFace(self, line):
-        """Parse a line for face emotes. Also remove any unsupported chars.
-           Does not sort out 5-bit encodable chars yet.
+        """
+        Parse a line for face emotes. Also remove any unsupported chars.  Does
+        not sort out 5-bit encodable chars yet.
+
+        >>> BitStreamer().parseLineFace('a B c D e')
+        ['a', ' ', 'B', ' ', 'c', ' ', 'D', ' ', 'e']
+        >>> BitStreamer().parseLineFace('Kappa foo bar')
+        ['Kappa', ' ', 'f', 'o', 'o', ' ', 'b', 'a', 'r']
         """
         spaces = self.tokenizeRegex.findall(line)
         words = self.tokenizeRegex.split(line)
