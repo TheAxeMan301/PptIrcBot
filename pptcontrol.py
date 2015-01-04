@@ -1,3 +1,4 @@
+import sys
 import os
 import time
 import re
@@ -165,7 +166,12 @@ SevenBitMapping = makeSevenBitMapping()
 
 
 def encodeThreeChars(c1=None, c2=None, c3=None):
-    """Get the 16-bit encoding for up to three characters"""
+    """
+    Get the 16-bit encoding for up to three characters.
+
+    >>> decodeBits(encodeThreeChars('a', 'b', 'c'))
+    '0000010001000011'
+    """
     n1 = FiveBitMapping.get(c1, 0)
     n2 = FiveBitMapping.get(c2, 0)
     n3 = FiveBitMapping.get(c3, 0)
@@ -173,7 +179,9 @@ def encodeThreeChars(c1=None, c2=None, c3=None):
 
 
 def encodeRedChar(redChar):
-    """Encode a char for red's text"""
+    """
+    Encode a char for red's text as a 16-bit value.
+    """
     return HighBitSet + SevenBitMapping.get(redChar, NullCharCode)
 
 
@@ -337,32 +345,30 @@ class BitStreamer(object):
                 self.redCooldown = 4
                 if len(self.chatChars) == 0:
                     #no chat char
-                    debug("One char for Red: '%s'" % (self.redChars[0],))
+                    debug("One char for Red: %r" % (self.redChars[0],))
                     return encodeRedChar(self.redChars.pop(0))
                 else:
                     #include a chat char
-                    debug("Chat: '%s' Red: '%s'" % (self.chatChars[0], self.redChars[0],))
+                    debug("Chat: %r Red: %r" % (self.chatChars[0], self.redChars[0],))
                     return encodeTwoChars(
                         self.chatChars.pop(0),
                         self.redChars.pop(0))
             else:
                 self.redCooldown -= 1
 
-        #Chat chars only. Figure out how many of next chars are 5-bit encodable.
-        #If at least two then we use the compact format.
-        if len(self.chatChars) >= 2 and \
-           self.chatChars[0] in FiveBitMapping and \
-           self.chatChars[1] in FiveBitMapping:
+        # Chat chars only. Figure out how many of next chars are 5-bit
+        # encodable.  If all three of them then we use the compact
+        # format.
+        if (len(self.chatChars) == 3 and
+                self.chatChars[0] in FiveBitMapping and
+                self.chatChars[1] in FiveBitMapping and
+                self.chatChars[2] in FiveBitMapping):
             c1 = self.chatChars.pop(0)
             c2 = self.chatChars.pop(0)
+            c3 = self.chatChars.pop(0)
 
-            #See if we can go for three
-            if len(self.chatChars) > 0 and self.chatChars[0] in FiveBitMapping:
-                debug("Three 5-bit chars: '%s' '%s' '%s'" % (c1, c2, self.chatChars[0]))
-                return encodeThreeChars(c1, c2, self.chatChars.pop(0))
-            #Just two, last will be empty
-            debug("Two 5-bit chars: '%s' '%s'" % (c1, c2))
-            return encodeThreeChars(c1, c2)
+            debug("Three 5-bit chars: %r %r" % (c1, c2, c3))
+            return encodeThreeChars(c1, c2, c3)
 
         #Send a chat char if one is available
         if len(self.chatChars) > 0:
@@ -407,6 +413,12 @@ class BitStreamerTestThread(Thread):
 
 def main():
     """For testing, display control output"""
+
+    if '--test' in sys.argv:
+        import doctest
+        res = doctest.testmod()
+        print res
+        sys.exit(1 if res.failed else 0)
 
     #Test with input from writepipe
     if True:
