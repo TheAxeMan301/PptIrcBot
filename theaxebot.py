@@ -128,9 +128,6 @@ class PptIrcBot(irc.client.SimpleIRCClient):
         self.nonPrintingChars = set([chr(i) for i in xrange(32)])
         self.nonPrintingChars.add(127)
 
-        self.screenPlayThread = ScreenPlayThread(self)
-        self.replayThread = ReplayTextThread(self.replayQueue)
-
     def on_welcome(self, connection, event):
         print 'joining', IrcChannel
         connection.join(IrcChannel)
@@ -139,6 +136,8 @@ class PptIrcBot(irc.client.SimpleIRCClient):
         """Fires on joining the channel.
            This is when the action starts.
         """
+        self.screenPlayThread = ScreenPlayThread(self)
+        self.replayThread = ReplayTextThread(self.replayQueue)
         print 'starting replay thread'
         self.replayThread.start()
         print 'starting screenplay thread'
