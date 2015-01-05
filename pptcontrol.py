@@ -211,7 +211,7 @@ def encodeTwoChars(chatChar=None, redChar=None):
 NopBits = encodeTwoChars()
 
 
-ShiftPaletteBits = 0b1000000011101110
+ShiftPaletteBits = 0b1111111111101110
 
 
 class TextPipeHandler(Thread):
