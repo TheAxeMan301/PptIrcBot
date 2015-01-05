@@ -91,7 +91,7 @@ class ScreenPlayThread(Thread):
                 if not m:
                     continue
                 delay = float(m.group('delay'))
-                speaker = m.group('speaker')
+                speaker = m.group('speaker').lower()
                 text = m.group('text')
                 self.script.append((delay, speaker, text))
 
