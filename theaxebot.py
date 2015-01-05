@@ -1,3 +1,5 @@
+#!/usr/bin/env python2.7
+
 #IRC and yaml reading bot
 
 import irc.client
