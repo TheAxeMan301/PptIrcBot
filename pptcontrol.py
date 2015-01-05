@@ -19,6 +19,8 @@ Bitstream format:
 1xxxxxxx1yyyyyyy - One char and a command. The command might cause some
                    following input to be treated differently.
 
+1xxxxxxx11101110 - Command to shift palette forward one.
+
 The 5 bit character mapping:
 
 0  (newline)    16 p
@@ -205,9 +207,11 @@ def encodeTwoChars(chatChar=None, redChar=None):
     """
     return HighBitSet + (SevenBitMapping.get(chatChar, NullCharCode) << 8) + SevenBitMapping.get(redChar, NullCharCode)
 
-
 # A no-op is two null chars
 NopBits = encodeTwoChars()
+
+
+ShiftPaletteBits = 0b1000000011101110
 
 
 class TextPipeHandler(Thread):
@@ -304,6 +308,8 @@ class BitStreamer(object):
         ['Kappa', ' ', 'Kappa', ' ', 'f', 'o', 'o']
         >>> BitStreamer().parseLine('a b  c   ')
         ['a', ' ', 'b', ' ', ' ', 'c', ' ', ' ', ' ']
+        >>> BitStreamer().parseLine('A ShiftPalette Z')
+        ['A', ' ', 'ShiftPalette', ' ', 'Z']
         """
         #First parse out any robot emotes
         robotEmotes = self.robotEmoteRegex.findall(line)
@@ -346,7 +352,7 @@ class BitStreamer(object):
         parsedLine = []
         for i in xrange(len(words)):
             word = words[i]
-            if word in FaceEmoteMap:
+            if word in FaceEmoteMap or word == 'ShiftPalette':
                 # Emote is treated like a single character
                 parsedLine.append(word)
             else:
@@ -361,8 +367,10 @@ class BitStreamer(object):
 
         #First see if we have chars for red
         if len(self.redChars) > 0:
+            if self.redChars[0] == 'ShiftPalette':
+                return ShiftPaletteBits
             if self.redCooldown == 0:
-                #Set cooldown - This is what slows down red's typing.
+                # Set cooldown - This is what slows down red's typing.
                 self.redCooldown = 4
                 if len(self.chatChars) == 0:
                     #no chat char
