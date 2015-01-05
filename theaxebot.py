@@ -4,7 +4,7 @@
 
 import irc.client
 import sys
-#import logging
+import logging
 import re
 import yaml
 import os
@@ -14,7 +14,7 @@ from Queue import Queue
 from subprocess import call
 
 #Setting the global logger to debug gets all sorts of irc debugging
-#logging.getLogger().setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 #Local debugging that can be easily turned off
 #from logging import debug
