@@ -2,7 +2,7 @@
 
 import irc.client
 import sys
-import logging
+#import logging
 import re
 import yaml
 import os
@@ -16,8 +16,12 @@ from subprocess import call
 
 #Local debugging that can be easily turned off
 #from logging import debug
+
+
 def debug(msg):
     print msg
+
+
 #debug = logging.critical
 
 settingsFile = open("settings.yaml")
@@ -68,6 +72,7 @@ class ReplayTextThread(Thread):
             msg = self.replayQueue.get()
             writeToPipe(writePipe, msg)
 
+
 class ScreenPlayThread(Thread):
     def __init__(self, ircBot):
         super(ScreenPlayThread, self).__init__()
@@ -77,28 +82,18 @@ class ScreenPlayThread(Thread):
         self.readScreenPlay(ScreenPlayFileName)
 
     def readScreenPlay(self, filename):
-        screenPlayFile = open(filename)
-        rawScript = screenPlayFile.readlines()
-        screenPlayFile.close()
-
-        for line in rawScript:
-            #Commented lines with #
-            if re.match("\s*#", line):
-                continue
-            words = line.split()
-            if len(words) < 3:
-                continue
-            delay = float(words[0])
-            speaker = words[1].lower()
-            m = re.match(words[0] + '\s+' + words[1] + '\s+(.+)', line)
-            if not m:
-                continue
-            text = m.groups()[0]
-            if text == '':
-                continue
-            self.script.append((delay, speaker, text))
-
-        return self.script
+        with open(filename) as rawScript:
+            for line in rawScript:
+                #Commented lines with #
+                if re.match("\s*#", line):
+                    continue
+                m = re.match(r'(?P<delay>\S+)\s+(?P<speaker>\S+?):?\s+(?P<text>.+)', line)
+                if not m:
+                    continue
+                delay = float(m.group('delay'))
+                speaker = m.group('speaker')
+                text = m.group('text')
+                self.script.append((delay, speaker, text))
 
     def run(self):
         if TasbotPipeEnable:
@@ -131,6 +126,9 @@ class PptIrcBot(irc.client.SimpleIRCClient):
         self.nonPrintingChars = set([chr(i) for i in xrange(32)])
         self.nonPrintingChars.add(127)
 
+        self.screenPlayThread = ScreenPlayThread(self)
+        self.replayThread = ReplayTextThread(self.replayQueue)
+
     def on_welcome(self, connection, event):
         connection.join(IrcChannel)
 
@@ -138,10 +136,7 @@ class PptIrcBot(irc.client.SimpleIRCClient):
         """Fires on joining the channel.
            This is when the action starts.
         """
-        self.replayThread = ReplayTextThread(self.replayQueue)
         self.replayThread.start()
-
-        self.screenPlayThread = ScreenPlayThread(self)
         self.screenPlayThread.start()
 
     def on_disconnect(self, connection, event):
