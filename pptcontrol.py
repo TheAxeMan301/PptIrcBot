@@ -297,7 +297,14 @@ class BitStreamer(object):
         debug("Parsed chat line: " + str(self.chatChars))
 
     def parseLine(self, line):
-        """Parse a line into list of chars and emotes"""
+        """
+        Parse a line into list of chars and emotes
+
+        >>> BitStreamer().parseLine('Kappa Kappa foo')
+        ['Kappa', ' ', 'Kappa', ' ', 'f', 'o', 'o']
+        >>> BitStreamer().parseLine('a b  c   ')
+        ['a', ' ', 'b', ' ', ' ', 'c', ' ', ' ', ' ']
+        """
         #First parse out any robot emotes
         robotEmotes = self.robotEmoteRegex.findall(line)
 
