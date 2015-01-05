@@ -14,7 +14,7 @@ from Queue import Queue
 from subprocess import call
 
 #Setting the global logger to debug gets all sorts of irc debugging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 
 #Local debugging that can be easily turned off
 #from logging import debug
