@@ -103,7 +103,7 @@ class ScreenPlayThread(Thread):
 
         for delay, speaker, text in self.script:
             time.sleep(delay)
-            #debug("%s says %s" % (speaker, text))
+            debug("%s says %s" % (speaker, text))
             if speaker == 'red':
                 self.ircBot.replayQueue.put("<red>:" + text)
                 self.ircBot.connection.privmsg(IrcChannel, text)
@@ -130,13 +130,16 @@ class PptIrcBot(irc.client.SimpleIRCClient):
         self.replayThread = ReplayTextThread(self.replayQueue)
 
     def on_welcome(self, connection, event):
+        print 'joining', IrcChannel
         connection.join(IrcChannel)
 
     def on_join(self, connection, event):
         """Fires on joining the channel.
            This is when the action starts.
         """
+        print 'starting replay thread'
         self.replayThread.start()
+        print 'starting screenplay thread'
         self.screenPlayThread.start()
 
     def on_disconnect(self, connection, event):
