@@ -171,9 +171,45 @@ def makeSevenBitMapping():
 
 SevenBitMapping = makeSevenBitMapping()
 
-#************************
-#*  Encoding functions  *
-#************************
+
+# Here we compile a massive regex that captures all multi-character symbols.
+SYMBOLS = [r'\bShiftPalette\b']
+SYMBOLS += sorted((re.escape(e) for e in RobotEmoteMap), reverse=True)
+SYMBOLS += [r'\b{}\b'.format(re.escape(e)) for e in sorted(FaceEmoteMap, reverse=True)]
+SYMBOL_REGEX = re.compile('(' + '|'.join(SYMBOLS) + ')')
+
+
+def textToSymbols(line):
+    """
+    Parse a line into list of symbols in our font, filtering out those which
+    cannot be displayed.
+
+    >>> textToSymbols('Kappa Kappa foo')
+    ['Kappa', ' ', 'Kappa', ' ', 'f', 'o', 'o']
+    >>> textToSymbols('a b  c   ')
+    ['a', ' ', 'b', ' ', ' ', 'c', ' ', ' ', ' ']
+    >>> textToSymbols('A ShiftPalette Z')
+    ['A', ' ', 'ShiftPalette', ' ', 'Z']
+    >>> textToSymbols('Kappa:D')
+    ['Kappa', ':D']
+    >>> textToSymbols('KappaKappa:D')
+    ['K', 'a', 'p', 'p', 'a', 'K', 'a', 'p', 'p', 'a', ':D']
+    >>> textToSymbols('a B c D e')
+    ['a', ' ', 'B', ' ', 'c', ' ', 'D', ' ', 'e']
+    >>> textToSymbols('Kappa foo bar')
+    ['Kappa', ' ', 'f', 'o', 'o', ' ', 'b', 'a', 'r']
+    >>> textToSymbols('>>>Hello :)Kappa__ UnSane')
+    ['H', 'e', 'l', 'l', 'o', ' ', ':)', 'K', 'a', 'p', 'p', 'a', '_', '_', ' ', 'UnSane']
+    """
+    symbols = []
+    for chunk in SYMBOL_REGEX.split(line):
+        if chunk in RobotEmoteMap or chunk in FaceEmoteMap or chunk == 'ShiftPalette':
+            symbols.append(chunk)
+        else:
+            for char in chunk:
+                if char in SevenBitMapping:
+                    symbols.append(char)
+    return symbols
 
 
 def encodeThreeChars(c1=None, c2=None, c3=None):
@@ -270,21 +306,13 @@ class BitStreamer(object):
         #Number of inputs until another char from red
         self.redCooldown = 0
 
-        # Here we compile a massive regex that finds all robot emotes.  Note
-        # that they must be in reverse-sorted order so that the longest prefix
-        # is matched in the case of overlap.
-        robotEmotes = map(re.escape, sorted(RobotEmoteMap.keys(), reverse=True))
-        self.robotEmoteRegex = re.compile('(?:' + '|'.join(robotEmotes) + ')')
-
-        self.tokenizeRegex = re.compile("[^A-Za-z0-9_@]+")
-
     def readRedQueue(self):
         """Grab a line of red's text"""
         if self.redQueue.empty():
             return
         #Red's lines just have the text
         text = self.redQueue.get().rstrip('\n')
-        self.redChars = self.parseLine(text) + ['\n']
+        self.redChars = textToSymbols(text) + ['\n']
         debug("Parsed red line: " + str(self.redChars))
 
     def readChatQueue(self):
@@ -297,70 +325,8 @@ class BitStreamer(object):
         nick = line.split(':')[0]
         #Ensure exactly one newline at end. Strip any off the right and add one back.
         text = line[len(nick) + 1:].rstrip('\n')
-        self.chatChars = [c for c in nick if c in SevenBitMapping] + [':', ' '] + self.parseLine(text) + ['\n']
+        self.chatChars = [c for c in nick if c in SevenBitMapping] + [':', ' '] + textToSymbols(text) + ['\n']
         debug("Parsed chat line: " + str(self.chatChars))
-
-    def parseLine(self, line):
-        """
-        Parse a line into list of chars and emotes
-
-        >>> BitStreamer().parseLine('Kappa Kappa foo')
-        ['Kappa', ' ', 'Kappa', ' ', 'f', 'o', 'o']
-        >>> BitStreamer().parseLine('a b  c   ')
-        ['a', ' ', 'b', ' ', ' ', 'c', ' ', ' ', ' ']
-        >>> BitStreamer().parseLine('A ShiftPalette Z')
-        ['A', ' ', 'ShiftPalette', ' ', 'Z']
-        """
-        #First parse out any robot emotes
-        robotEmotes = self.robotEmoteRegex.findall(line)
-
-        #With no robot emotes skip to parsing for face emotes
-        if len(robotEmotes) == 0:
-            return self.parseLineFace(line)
-
-        #Otherwise we have n robot emotes separating n+1 sections of text
-        sections = self.robotEmoteRegex.split(line)
-
-        #Sanity check...want to be defensive here
-        if len(sections) != len(robotEmotes) + 1:
-            return self.parseLineFace(line)
-
-        parsedLine = []
-        for i in xrange(len(sections)):
-            parsedLine += self.parseLineFace(sections[i])
-            if i < len(robotEmotes):
-                parsedLine.append(robotEmotes[i])
-        return parsedLine
-
-    def parseLineFace(self, line):
-        """
-        Parse a line for face emotes. Also remove any unsupported chars.  Does
-        not sort out 5-bit encodable chars yet.
-
-        >>> BitStreamer().parseLineFace('a B c D e')
-        ['a', ' ', 'B', ' ', 'c', ' ', 'D', ' ', 'e']
-        >>> BitStreamer().parseLineFace('Kappa foo bar')
-        ['Kappa', ' ', 'f', 'o', 'o', ' ', 'b', 'a', 'r']
-        """
-        spaces = self.tokenizeRegex.findall(line)
-        words = self.tokenizeRegex.split(line)
-
-        #sanity...
-        if len(spaces) + 1 != len(words):
-            return [c for c in line if c in SevenBitMapping]
-
-        parsedLine = []
-        for i in xrange(len(words)):
-            word = words[i]
-            if word in FaceEmoteMap or word == 'ShiftPalette':
-                # Emote is treated like a single character
-                parsedLine.append(word)
-            else:
-                # Other text gets split into chars. Invalid chars screened out.
-                parsedLine += [c for c in word if c in SevenBitMapping]
-            if i < len(spaces):
-                parsedLine += [c for c in spaces[i] if c in SevenBitMapping]
-        return parsedLine
 
     def getBitsToSend(self):
         """Check our char queues and get the bits to send"""
@@ -449,16 +415,10 @@ def main():
         print res
         sys.exit(1 if res.failed else 0)
 
-    #Test with input from writepipe
-    if True:
-        bs = BitStreamer('pipe_test')
-        BitStreamerTestThread(bs).start()
-
-    #Test some other code
-    if False:
-        bs = BitStreamer()
-        print bs.parseLine('>>>Hello :)Kappa__ UnSane')
-        print decodeBits(bs.getNextBits())
+    bs = BitStreamer('pipe_test')
+    thread = BitStreamerTestThread(bs)
+    thread.daemon = True
+    thread.start()
 
 
 if __name__ == "__main__":
