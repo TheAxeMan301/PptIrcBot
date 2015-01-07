@@ -61,6 +61,9 @@ Let's call the 7 bits the opcode.
 
 LINE_LENGTH = 32  # Number of symbols per line.
 
+
+RED_COOLDOWN = 4  # Delay between RED's characters.
+
 #This is 10000000 0000000, 16 bits with just the high bit set
 HighBitSet = 2 ** 15
 
@@ -364,7 +367,7 @@ class BitStreamer(object):
                 return ShiftPaletteBits
             if self.redCooldown == 0:
                 # Set cooldown - This is what slows down red's typing.
-                self.redCooldown = 4
+                self.redCooldown = RED_COOLDOWN
                 if len(self.chatChars) == 0:
                     #no chat char
                     debug("One char for Red: %r" % (self.redChars[0],))
