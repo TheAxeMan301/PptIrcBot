@@ -59,6 +59,8 @@ What about the commands? At the very least we need a command for emotes.
 Let's call the 7 bits the opcode.
 """
 
+LINE_LENGTH = 32  # Number of symbols per line.
+
 #This is 10000000 0000000, 16 bits with just the high bit set
 HighBitSet = 2 ** 15
 
@@ -212,6 +214,36 @@ def textToSymbols(line):
     return symbols
 
 
+def formatRoomMessage(message):
+    r"""
+    Format an IRC message from the chat room by converting it to the font's
+    symbol set and applying line wrapping.  The result is a list of symbols.
+
+    >>> formatRoomMessage('blue:hello, world!')
+    ['b', 'l', 'u', 'e', ':', ' ', 'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!', '\n']
+    >>> formatRoomMessage('<yellow>:go:far\n')
+    ['y', 'e', 'l', 'l', 'o', 'w', ':', ' ', 'g', 'o', ':', 'f', 'a', 'r', '\n']
+
+    >>> message = 'purple:this is a long message, one so long it will wrap\n'
+    >>> lines = list(
+    ...     'purple: this is a long message, \n'
+    ...     'one so long it will wrap\n'
+    ... )
+    >>> formatRoomMessage(message) == lines
+    True
+    """
+    # Full line should have nick:text. Need to split that up because nick does
+    # not get emotes.
+    nick, text = message.split(':', 1)
+    symbols = ([c for c in nick if c in SevenBitMapping] + [':', ' '] +
+               textToSymbols(text.rstrip('\n')))
+    lines = []
+    for i in range(0, len(symbols), LINE_LENGTH):
+        lines.extend(symbols[i:i + LINE_LENGTH])
+        lines.append('\n')
+    return lines
+
+
 def encodeThreeChars(c1=None, c2=None, c3=None):
     """
     Get the 16-bit encoding for up to three characters.
@@ -319,13 +351,8 @@ class BitStreamer(object):
         """Grab a line of chat text"""
         if self.chatQueue.empty():
             return
-        #Full line should have nick:text. Need to split that up because
-        #nick does not get emotes
         line = self.chatQueue.get()
-        nick = line.split(':')[0]
-        #Ensure exactly one newline at end. Strip any off the right and add one back.
-        text = line[len(nick) + 1:].rstrip('\n')
-        self.chatChars = [c for c in nick if c in SevenBitMapping] + [':', ' '] + textToSymbols(text) + ['\n']
+        self.chatChars = formatRoomMessage(line)
         debug("Parsed chat line: " + str(self.chatChars))
 
     def getBitsToSend(self):
