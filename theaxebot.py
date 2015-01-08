@@ -14,15 +14,17 @@ from Queue import Queue
 from subprocess import call
 
 #Setting the global logger to debug gets all sorts of irc debugging
-logging.basicConfig(level=logging.WARNING)
+#logging.getLogger().setLevel(logging.DEBUG)
 
 #Local debugging that can be easily turned off
 #from logging import debug
 
 
 def debug(msg):
-    print msg
-
+    try:
+        print msg
+    except UnicodeEncodeError:
+        pass
 
 #debug = logging.critical
 
@@ -105,10 +107,10 @@ class ScreenPlayThread(Thread):
 
         for delay, speaker, text in self.script:
             time.sleep(delay)
-            debug("%s says %s" % (speaker, text))
+            #debug("%s says %s" % (speaker, text))
             if speaker == 'red':
                 self.ircBot.replayQueue.put("<red>:" + text)
-                self.ircBot.connection.privmsg(IrcChannel, text)
+                # self.ircBot.connection.privmsg(IrcChannel, text)
             if speaker == 'tasbot':
                 if TasbotPipeEnable:
                     writeToPipe(tasBotPipe, text)
@@ -136,12 +138,21 @@ class PptIrcBot(irc.client.SimpleIRCClient):
         """Fires on joining the channel.
            This is when the action starts.
         """
-        self.screenPlayThread = ScreenPlayThread(self)
-        self.replayThread = ReplayTextThread(self.replayQueue)
-        print 'starting replay thread'
-        self.replayThread.start()
-        print 'starting screenplay thread'
-        self.screenPlayThread.start()
+        if (event.source.find(IrcNick) != -1):
+            print "I joined!"
+            self.screenPlayThread = ScreenPlayThread(self)
+            self.replayThread = ReplayTextThread(self.replayQueue)
+            print 'starting replay thread'
+            self.replayThread.start()
+            print 'starting screenplay thread'
+            self.screenPlayThread.start()
+
+        # self.screenPlayThread = ScreenPlayThread(self)
+        # self.replayThread = ReplayTextThread(self.replayQueue)
+        # print 'starting replay thread'
+        # self.replayThread.start()
+        # print 'starting screenplay thread'
+        # self.screenPlayThread.start()
 
     def on_disconnect(self, connection, event):
         sys.exit(0)
@@ -150,7 +161,8 @@ class PptIrcBot(irc.client.SimpleIRCClient):
         #Be sure to get rid of the naughty message before the event!
         #An easy way is to just make this function a pass
         #pass
-        self.connection.privmsg(IrcChannel, "Naughty %s (%s)" % (sender, reason))
+        # self.connection.privmsg(IrcChannel, "Naughty %s (%s)" % (sender, reason))
+        print("Naughty %s (%s)" % (sender, reason))
 
     def on_pubmsg(self, connection, event):
         debug("pubmsg from %s: %s" % (event.source, event.arguments[0]))
@@ -181,26 +193,52 @@ class PptIrcBot(irc.client.SimpleIRCClient):
             self.naughtyMessage(sender, "non-printing chars")
             return
 
-        words = self.splitter.split(text)
-        if any(word.lower() in self.badWords for word in words):
-            self.naughtyMessage(sender, "bad word")
+        text_lower = text.lower()
+        for badword_regex in self.badWords:
+          if badword_regex.search(text_lower):
+            self.naughtyMessage(sender, "bad word: " + badword_regex.pattern)
             return
+        
+        words = self.splitter.split(text_lower)
+        words = map(lambda x:x.lower(),words)
+        print words
+
+        # if any(word.lower() in self.badWords for word in words):
+            # self.naughtyMessage(sender, "bad word:" + word)
+            # return
         self.replayQueue.put(sender + ':' + text)
 
     def getBadWords(self, filename):
         #Make sure all the entries are lower case
         #We lower-case the incoming text to make the check case-insensitive
         badWords = open(filename)
-        badWordList = set([word.strip().lower() for word in badWords.readlines()])
+        badWordList_strings = set([word.strip().lower() for word in badWords.readlines()])
         badWords.close()
+        
+        if '' in badWordList_strings:
+            badWordList_strings.remove('')
+        
+        badWordList_regex_strings = []
 
-        if '' in badWordList:
-            badWordList.remove('')
-
-        #Add an s to everything on the list and ban that too
-        for badWord in list(badWordList):
-            badWordList.add(badWord + 's')
-
+        for word in badWordList_strings:
+            word = re.sub(r'[sz]', '[s5z2$]', word);
+            word = re.sub(r'a', '[a4]', word);
+            word = re.sub(r'e', '[e3]', word);
+            word = re.sub(r'i', '[i1]', word);
+            word = re.sub(r'l', '[l1]', word);
+            word = re.sub(r'o', '[o0]', word);
+            word = re.sub(r't', '[t7]', word);
+            word = re.sub(r'g', '[g6]', word);
+            word = re.sub(r'b', '[b8]', word);
+            word = re.sub(r'f', '(f|ph)', word);
+            word = re.sub(r'(c|k)', '[ck]', word);
+            badWordList_regex_strings.append(word)
+        
+        badWordList = []
+        
+        for word in badWordList_regex_strings:
+            badWordList.append(re.compile(word))
+        
         return badWordList
 
 
