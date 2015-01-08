@@ -68,7 +68,7 @@ RED_COOLDOWN = 4  # Delay between RED's characters.
 HighBitSet = 2 ** 15
 
 #The 7-bit encoding for null character
-NullCharCode = 127
+NullCharCode = 255
 
 
 #************************
@@ -276,7 +276,8 @@ def encodeTwoChars(chatChar=None, redChar=None):
     """Encode two characters, one for chat and one for Red.
        Both are optional.
     """
-    return HighBitSet + (SevenBitMapping.get(chatChar, NullCharCode) << 8) + SevenBitMapping.get(redChar, NullCharCode)
+    #return HighBitSet + (SevenBitMapping.get(chatChar, NullCharCode) << 8) + SevenBitMapping.get(redChar, NullCharCode)
+    return (SevenBitMapping.get(chatChar, NullCharCode) << 8) + SevenBitMapping.get(redChar, NullCharCode)
 
 # A no-op is two null chars
 NopBits = encodeTwoChars()
