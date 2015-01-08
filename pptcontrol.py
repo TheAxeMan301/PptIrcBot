@@ -364,6 +364,7 @@ class BitStreamer(object):
         #First see if we have chars for red
         if len(self.redChars) > 0:
             if self.redChars[0] == 'ShiftPalette':
+                self.redChars.pop(0)
                 return ShiftPaletteBits
             if self.redCooldown == 0:
                 # Set cooldown - This is what slows down red's typing.
