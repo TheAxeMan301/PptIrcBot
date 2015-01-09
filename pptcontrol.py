@@ -317,7 +317,7 @@ class TextPipeHandler(Thread):
             line = self.readNextLine()
             if line.startswith('<red>'):
                 debug('line for Red: ' + line)
-                self.redQueue.put(line)
+                self.redQueue.put(line[len('<red>:'):])
             #Check the number of chat lines queued up. Drop this one if there are too many.
             elif self.chatQueue.qsize() < 20:
                 debug('chat line: ' + line)
@@ -350,7 +350,6 @@ class BitStreamer(object):
         #Red's lines just have the text
         text = self.redQueue.get().rstrip('\n')
         self.redChars = textToSymbols(text) + ['\n']
-        self.redChars = self.redChars[4:]
         debug("Parsed red line: " + str(self.redChars))
 
     def readChatQueue(self):
