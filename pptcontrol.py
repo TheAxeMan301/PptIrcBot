@@ -247,6 +247,22 @@ def formatRoomMessage(message):
     return lines
 
 
+def padForRed(symbols):
+    """
+    Pad the message with spaces so that its length is a multiple of 32.
+
+    :param list symbols:
+
+    >>> padForRed(['a']) == ['a'] + [' '] * 31
+    True
+    >>> padForRed(['a'] * 32) == ['a'] * 32
+    True
+    """
+    if len(symbols) % 32 == 0:
+        return symbols
+    return symbols + [' '] * (32 - (len(symbols) % 32))
+
+
 def encodeThreeChars(c1=None, c2=None, c3=None):
     """
     Get the 16-bit encoding for up to three characters.
@@ -349,7 +365,7 @@ class BitStreamer(object):
             return
         #Red's lines just have the text
         text = self.redQueue.get().rstrip('\n')
-        self.redChars = textToSymbols(text) + ['\n']
+        self.redChars = padForRed(textToSymbols(text)) + ['\n']
         debug("Parsed red line: " + str(self.redChars))
 
     def readChatQueue(self):
