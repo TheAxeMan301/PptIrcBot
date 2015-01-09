@@ -14,10 +14,7 @@ from Queue import Queue
 from subprocess import call
 
 #Setting the global logger to debug gets all sorts of irc debugging
-#logging.getLogger().setLevel(logging.DEBUG)
-
-#Local debugging that can be easily turned off
-#from logging import debug
+logging.getLogger().setLevel(logging.WARNING)
 
 
 def debug(msg):
@@ -26,7 +23,6 @@ def debug(msg):
     except UnicodeEncodeError:
         pass
 
-#debug = logging.critical
 
 settingsFile = open("settings.yaml")
 settings = yaml.load(settingsFile)
@@ -195,12 +191,12 @@ class PptIrcBot(irc.client.SimpleIRCClient):
 
         text_lower = text.lower()
         for badword_regex in self.badWords:
-          if badword_regex.search(text_lower):
-            self.naughtyMessage(sender, "bad word: " + badword_regex.pattern)
-            return
-        
+            if badword_regex.search(text_lower):
+                self.naughtyMessage(sender, "bad word: " + badword_regex.pattern)
+                return
+
         words = self.splitter.split(text_lower)
-        words = map(lambda x:x.lower(),words)
+        words = map(lambda x: x.lower(), words)
         print words
 
         # if any(word.lower() in self.badWords for word in words):
@@ -214,31 +210,31 @@ class PptIrcBot(irc.client.SimpleIRCClient):
         badWords = open(filename)
         badWordList_strings = set([word.strip().lower() for word in badWords.readlines()])
         badWords.close()
-        
+
         if '' in badWordList_strings:
             badWordList_strings.remove('')
-        
+
         badWordList_regex_strings = []
 
         for word in badWordList_strings:
-            word = re.sub(r'[sz]', '[s5z2$]', word);
-            word = re.sub(r'a', '[a4]', word);
-            word = re.sub(r'e', '[e3]', word);
-            word = re.sub(r'i', '[i1]', word);
-            word = re.sub(r'l', '[l1]', word);
-            word = re.sub(r'o', '[o0]', word);
-            word = re.sub(r't', '[t7]', word);
-            word = re.sub(r'g', '[g6]', word);
-            word = re.sub(r'b', '[b8]', word);
-            word = re.sub(r'f', '(f|ph)', word);
-            word = re.sub(r'(c|k)', '[ck]', word);
+            word = re.sub(r'[sz]', '[s5z2$]', word)
+            word = re.sub(r'a', '[a4]', word)
+            word = re.sub(r'e', '[e3]', word)
+            word = re.sub(r'i', '[i1]', word)
+            word = re.sub(r'l', '[l1]', word)
+            word = re.sub(r'o', '[o0]', word)
+            word = re.sub(r't', '[t7]', word)
+            word = re.sub(r'g', '[g6]', word)
+            word = re.sub(r'b', '[b8]', word)
+            word = re.sub(r'f', '(f|ph)', word)
+            word = re.sub(r'(c|k)', '[ck]', word)
             badWordList_regex_strings.append(word)
-        
+
         badWordList = []
-        
+
         for word in badWordList_regex_strings:
             badWordList.append(re.compile(word))
-        
+
         return badWordList
 
 
