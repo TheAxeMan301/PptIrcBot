@@ -350,6 +350,7 @@ class BitStreamer(object):
         #Red's lines just have the text
         text = self.redQueue.get().rstrip('\n')
         self.redChars = textToSymbols(text) + ['\n']
+        self.redChars = self.redChars[4:]
         debug("Parsed red line: " + str(self.redChars))
 
     def readChatQueue(self):
