@@ -238,7 +238,7 @@ def formatRoomMessage(message):
     # Full line should have nick:text. Need to split that up because nick does
     # not get emotes.
     nick, text = message.split(':', 1)
-    symbols = ([c for c in nick if c in SevenBitMapping] + [':', ' '] +
+    symbols = ([c for c in nick if c in SevenBitMapping] + [':'] +
                textToSymbols(text.rstrip('\n')))
     return symbols + ['\n']
     #This puts newlines for each line. Instead the snes side will handle this.
