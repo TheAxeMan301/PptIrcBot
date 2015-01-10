@@ -10,6 +10,7 @@ import yaml
 import os
 import time
 from threading import Thread
+import traceback
 from Queue import Queue
 from subprocess import call
 
@@ -82,6 +83,10 @@ class ScreenPlayThread(Thread):
         self.readScreenPlay(ScreenPlayFileName)
 
     def readScreenPlay(self, filename):
+        if TasbotPipeEnable:
+            if not os.path.exists(TasbotPipeName):
+                os.mkfifo(TasbotPipeName)
+
         with open(filename) as rawScript:
             for line in rawScript:
                 #Commented lines with #
@@ -94,26 +99,29 @@ class ScreenPlayThread(Thread):
                 speaker = m.group('speaker').lower()
                 text = m.group('text')
                 self.script.append((delay, speaker, text))
+        print 'Loaded script with {} lines'.format(len(self.script))
 
     def run(self):
-        if TasbotPipeEnable:
-            if not os.path.exists(TasbotPipeName):
-                os.mkfifo(TasbotPipeName)
-            tasBotPipe = open(TasbotPipeName, 'w')
-
-        for delay, speaker, text in self.script:
-            time.sleep(delay)
-            #debug("%s says %s" % (speaker, text))
-            if speaker == 'red':
-                self.ircBot.replayQueue.put("<red>:" + text)
-                # self.ircBot.connection.privmsg(IrcChannel, text)
-            if speaker == 'tasbot':
-                if TasbotPipeEnable:
-                    writeToPipe(tasBotPipe, text)
-                if TasbotEspeakEnable:
-                    call(['espeak', '-p42', '-s140', '-m', text])
-            if speaker == 'tasbott':
-                self.ircBot.replayQueue.put("<red>:TASBot says {}".format(text))
+        try:
+            if TasbotPipeEnable:
+                tasBotPipe = open(TasbotPipeName, 'w')
+            for delay, speaker, text in self.script:
+                time.sleep(delay)
+                debug("%s says %s" % (speaker, text))
+                if speaker == 'red':
+                    self.ircBot.replayQueue.put("<red>:" + text)
+                    self.ircBot.sendMessage(text)
+                if speaker == 'tasbot':
+                    if TasbotPipeEnable:
+                        writeToPipe(tasBotPipe, text)
+                    if TasbotEspeakEnable:
+                        call(['espeak', '-p42', '-s140', '-m', text])
+                if speaker == 'tasbott':
+                    msg = u'TASBot says, \u201c{}"\u201d'.format(text)
+                    self.ircBot.sendMessage(msg)
+        except:
+            traceback.print_exc()
+            sys.exit(1)
 
 
 class PptIrcBot(irc.client.SimpleIRCClient):
@@ -127,6 +135,14 @@ class PptIrcBot(irc.client.SimpleIRCClient):
         self.replayQueue = Queue()
         self.nonPrintingChars = set([chr(i) for i in xrange(32)])
         self.nonPrintingChars.add(127)
+
+    def sendMessage(self, msg):
+        # We don't want this showing up in chat:
+        msg = re.sub(r'\s*ShiftPalette\s*', ' ', msg)
+        if msg.isspace():
+            # This message only contained ShiftPalette.
+            return
+        self.connection.privmsg(IrcChannel, msg)
 
     def on_welcome(self, connection, event):
         print 'joining', IrcChannel
