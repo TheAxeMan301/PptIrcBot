@@ -112,6 +112,8 @@ class ScreenPlayThread(Thread):
                     writeToPipe(tasBotPipe, text)
                 if TasbotEspeakEnable:
                     call(['espeak', '-p42', '-s140', '-m', text])
+            if speaker == 'tasbott':
+                self.ircBot.replayQueue.put("<red>:TASBot says {}".format(text))
 
 
 class PptIrcBot(irc.client.SimpleIRCClient):
