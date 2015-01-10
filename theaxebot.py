@@ -117,7 +117,7 @@ class ScreenPlayThread(Thread):
                     if TasbotEspeakEnable:
                         call(['espeak', '-p42', '-s140', '-m', text])
                 if speaker == 'tasbott':
-                    msg = u'TASBot says, \u201c{}"\u201d'.format(text)
+                    msg = u'TASBot says: {}'.format(text)
                     self.ircBot.sendMessage(msg)
         except:
             traceback.print_exc()
