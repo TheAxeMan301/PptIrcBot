@@ -240,11 +240,13 @@ def formatRoomMessage(message):
     nick, text = message.split(':', 1)
     symbols = ([c for c in nick if c in SevenBitMapping] + [':', ' '] +
                textToSymbols(text.rstrip('\n')))
-    lines = []
-    for i in range(0, len(symbols), LINE_LENGTH):
-        lines.extend(symbols[i:i + LINE_LENGTH])
-        lines.append('\n')
-    return lines
+    return symbols + ['\n']
+    #This puts newlines for each line. Instead the snes side will handle this.
+    #lines = []
+    #for i in range(0, len(symbols), LINE_LENGTH):
+        #lines.extend(symbols[i:i + LINE_LENGTH])
+        #lines.append('\n')
+    #return lines
 
 
 def padForRed(symbols):
@@ -416,7 +418,7 @@ class BitStreamer(object):
 
         #Send a chat char if one is available
         if len(self.chatChars) > 0:
-            debug("One 7-bit char: '%s'" % (self.chatChars[0]))
+            debug("One 7-bit char: %r" % (self.chatChars[0]))
             return encodeChatChar(self.chatChars.pop(0))
 
         #Default to no-op
