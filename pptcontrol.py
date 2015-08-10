@@ -7,7 +7,8 @@ from Queue import Queue
 
 
 def debug(msg):
-    print msg
+    # print msg
+    pass
 
 
 """
@@ -62,7 +63,7 @@ Let's call the 7 bits the opcode.
 LINE_LENGTH = 32  # Number of symbols per line.
 
 
-RED_COOLDOWN = 4  # Delay between RED's characters.
+RED_COOLDOWN = 100  # Delay between RED's characters.
 
 #This is 10000000 0000000, 16 bits with just the high bit set
 HighBitSet = 2 ** 15
@@ -238,7 +239,7 @@ def formatRoomMessage(message):
     # Full line should have nick:text. Need to split that up because nick does
     # not get emotes.
     nick, text = message.split(':', 1)
-    symbols = ([c for c in nick if c in SevenBitMapping] + [':'] +
+    symbols = ([c for c in nick if c in SevenBitMapping] + [':', ' '] +
                textToSymbols(text.rstrip('\n')))
     return symbols + ['\n']
     #This puts newlines for each line. Instead the snes side will handle this.
@@ -260,9 +261,10 @@ def padForRed(symbols):
     >>> padForRed(['a'] * 32) == ['a'] * 32
     True
     """
-    if len(symbols) % 32 == 0:
+    if len(symbols) % 28 == 0:
         return symbols
-    return symbols + [' '] * (32 - (len(symbols) % 32))
+
+    return symbols + [' '] * (28 - (len(symbols) % 28))
 
 
 def encodeThreeChars(c1=None, c2=None, c3=None):
@@ -367,7 +369,12 @@ class BitStreamer(object):
             return
         #Red's lines just have the text
         text = self.redQueue.get().rstrip('\n')
-        self.redChars = padForRed(textToSymbols(text)) + ['\n']
+        # self.redChars = padForRed(textToSymbols(text)) + ['\n']
+        symbols = textToSymbols(text)
+        if (symbols[0] == "ShiftPalette"):
+            self.redChars = symbols
+        else:
+            self.redChars = padForRed(symbols)
         debug("Parsed red line: " + str(self.redChars))
 
     def readChatQueue(self):
@@ -454,7 +461,7 @@ class BitStreamerTestThread(Thread):
         #For testing we grab an stream input every 1/10 of a second
         for i in xrange(1000):
             time.sleep(0.1)
-            print decodeBits(self.bs.getNextBits())
+            # print decodeBits(self.bs.getNextBits())
 
 
 def main():
@@ -463,7 +470,7 @@ def main():
     if '--test' in sys.argv:
         import doctest
         res = doctest.testmod()
-        print res
+        # print res
         sys.exit(1 if res.failed else 0)
 
     bs = BitStreamer('pipe_test')

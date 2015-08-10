@@ -116,6 +116,9 @@ class ScreenPlayThread(Thread):
                         writeToPipe(tasBotPipe, text)
                     if TasbotEspeakEnable:
                         call(['espeak', '-p42', '-s140', '-m', text])
+                        # call("espeak -p42 -s140 -m --stdout " + text)
+                        #call(["espeak -p42 -s140 -m --stdout " + text + " | aplay -D 'hw'"])
+                                                                                                
                 if speaker == 'tasbott':
                     msg = u'TASBot says: {}'.format(text)
                     self.ircBot.sendMessage(msg)
@@ -182,6 +185,7 @@ class PptIrcBot(irc.client.SimpleIRCClient):
         debug("pubmsg from %s: %s" % (event.source, event.arguments[0]))
         text = event.arguments[0]
         sender = event.source.split('!')[0]
+        text = sender + ":" + text
 
         #Check for non-ascii characters
         try:
@@ -220,7 +224,7 @@ class PptIrcBot(irc.client.SimpleIRCClient):
         # if any(word.lower() in self.badWords for word in words):
             # self.naughtyMessage(sender, "bad word:" + word)
             # return
-        self.replayQueue.put(sender + ':' + text)
+        self.replayQueue.put(text)
 
     def getBadWords(self, filename):
         #Make sure all the entries are lower case

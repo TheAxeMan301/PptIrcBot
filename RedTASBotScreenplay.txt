@@ -3,13 +3,20 @@
 #The speaker can be red or tasbot and it is case insensitive so feel free to use TasBot or Tasbot or whatever
 #Whitespace between those three items is ignored but whitespace in text is preserved
 #And of course any lines starting with # are comments
-1    TASBot: I am TASBot. Hello, A G D Q 2015!
-14 dwangoAC: Hi, TASBot!
+1    TASBot: [[poUk'ima#n]] plays twitch
+5       RED: a                           
+1    TASBot: [[poUkima#n]] plays twitch
+5    TASBot: I am TASBot. Hello Aigh Gee D Q twenty fifteen!
+1  dwangoAC: Hi, TASBot!
+5       RED: c                          
 4    TASBot: I like to play games.
+1       RED: b                         
+1       RED: bbbbbbbbbbb
 6  dwangoAC: I bet you do. What game would you like to play today?
 8    TASBot: Pokemon plays Twitch.
+1       RED: c                            
 5  dwangoAC: I think you mean Twitch plays Pokemon.
-6    TASBot: I will make RED play.
+3    TASBot: I will make Red play.
 4  dwangoAC: Make?
 8       RED: I am RED. Hello, AGDQ 2015!
 5  dwangoAC: TASBot, what are you doing?
@@ -22,7 +29,7 @@
 5       RED: You can do better, show me your FrankerZ
 7  dwangoAC: What are you doing, RED?
 5       RED: I need more FrankerZ!
-10      RED: They did it!
+1       RED: They did it!
 1       RED: I just totally played Twitch!
 5    TASBot: That is a good way to play, RED.
 3  dwangoAC: I'm not so sure about that.
@@ -45,16 +52,22 @@
 5       RED: TASBot is broken, he does not understand emotion.
 5    TASBot: I am perfect. Everything I do must be perfect.
 5       RED: Oh yeah? Go look at TASVideos.org
+1       RED: ShiftPalette
+5       RED: ShiftPalette
 5       RED: I bet *something* there isn't perfect.
 5    TASBot: This site not perfect. There is too much purple.
 5       RED: And what are you going to do about it, bugeyes?
 5    TASBot: I will make it perfect.
 3  dwangoAC: But I like the site the way it is!
+1       RED: ShiftPalette
 5    TASBot: I made it perfect.
+1       RED: ShiftPalette
 5       RED: No you didn't, you made it ugly.
 3  dwangoAC: How did you do that to the real site?
 5       RED: Twitch chat, what color should the site be?
-5    TASBot: I like this color.
+5    TASBot: I like that color.
+1       RED: ShiftPalette
+1       RED: ShiftPalette
 5       RED: Do what Twitch chat wants.
 5    TASBot: No.
 5       RED: No?

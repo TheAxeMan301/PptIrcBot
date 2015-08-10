@@ -4,7 +4,7 @@ import sys
 import os
 import time
 
-pipeName = 'pipe_test'
+pipeName = 'replay_pipe'
 
 def sendMessage(msg):
     writePipe = open(pipeName, 'w')

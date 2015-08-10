@@ -3,92 +3,94 @@
 #The speaker can be red or tasbot and it is case insensitive so feel free to use TasBot or Tasbot or whatever
 #Whitespace between those three items is ignored but whitespace in text is preserved
 #And of course any lines starting with # are comments
-5    TASBot: [[aI_ a#m t'as b'0t]]. [[h@l'oU:_: 'eI: dZ'i: d'i: kj'u: twEnt'i fIft'i:n]]
+0    TASBot: [[aI_ a#m t'as b'0t]]. [[h@l'oU:_: 'eI: dZ'i: d'i: kj'u: twEnt'i fIft'i:n]]
 0   TASBotT: I am TASBot. Hello AGDQ 2015!
-1  dwangoAC: Hi, TASBot!
-5       RED: c                          
-4    TASBot: I like to play games.
+0  dwangoAC: Hi, TASBot!
+7    TASBot: I like to play games.
 0   TASBotT: I like to play games.
-1       RED: b                         
-1       RED: bbbbbbbbbbb
-6  dwangoAC: I bet you do. What game would you like to play today?
-8    TASBot: [[poUk'ima#n]] plays twitch
-0   TASBotT: Pokemon plays Twitch.
-1       RED: c                            
-5  dwangoAC: I think you mean Twitch plays Pokemon.
-3    TASBot: [[aI wIl m,eIk r'Ed pleI]].
-0   TASBotT: I will make Red play.
-4  dwangoAC: Make?
-8       RED: I am RED. Hello, AGDQ 2015!
-5  dwangoAC: TASBot, what are you doing?
-5    TASBot: [[dZ:'OInIN]] Twitch chat.
-0   TASBotT: Joining Twitch chat.
-5  dwangoAC: TASBot, are you sure joining twitch chat is a good idea?
-5    TASBot: RED, it is time for you [[tu:]] play.
+0  dwangoAC: I bet you do. What game would you like to play today?
+2    TASBot: Today [[aI wIl m,eIk r'Ed pleI poUk'ima#n]] plays twitch
+0   TASBotT: Today I will make Red play Pokemon plays Twitch.
+0  dwangoAC: Make?
+1    TASBot: RED, it is time for you [[tu:]] play.
 0   TASBotT: RED, it is time for you to play.
-5       RED: Hello, Twitch chat!
-7  dwangoAC: Wait, back up - how can Pokemon play Twitch?
-5       RED: Twitch chat, everyone spam BibleThump!
-5       RED: You can do better, show me your BibleThump
-7  dwangoAC: What are you doing, RED?
-5       RED: I need more BibleThump!
-1       RED: They did it!
-1       RED: I just totally played Twitch!
-5    TASBot: [[D'aat]] is a good way to play [[_]] red.
-0    TASBotT: That is a good way to play, RED.
-3  dwangoAC: I'm not so sure about that.
-3       RED: I like this game.
-1       RED: It is comfy and easy to wear.
-8  dwangoAC: That doesn't even make sense.
-5    TASBot: Make Twitch chat do another trick.
+0  dwangoAC: Wait, back up - how can Pokemon play Twitch?
+2       RED: Hi chat, spam BibleTHump! BibleThump
+9       RED: You can do better
+1       RED: Show me your BibleThUmp BibleThump
+0  dwangoAC: What are you doing, RED?
+5       RED: I need more BibleThuMp! BibleThump
+8       RED: They did it!
+1       RED: I just "played" Twitch!
+3    TASBot: [[D'aat]] is a good way to play [[_]] red.
+0   TASBotT: That is a good way to play, RED.
+0  dwangoAC: I'm not so sure about that.
+6       RED: I like this game.
+1       RED: It is comfy
+1       RED: and easy to wear
+0  dwangoAC: That doesn't even make sense.
+3    TASBot: Make Twitch chat do another trick.
 0   TASBotT: Make Twitch chat do another trick.
-3       RED: No.
-2    TASBot: No?
+2       RED: No.
+1    TASBot: No?
 0   TASBotT: No?
-1       RED: Twitch chat is not yet trained well enough.
-5    TASBot: Make Twitch chat do a trick now!
+1       RED: I don't want to train chat
+2    TASBot: Make Twitch chat do a trick now!
 0   TASBotT: Make Twitch chat do a trick now!
-3  dwangoAC: I'm staying out of this.
-3       RED: Okay. I will consult the Helix Fossil.
-7       RED: Hey, Twitch chat! Tell TASBot to be happy.
-5    TASBot: I do not understand this word [[_:_:]] Happy.
+0  dwangoAC: I'm staying out of this.
+3       RED: Okay.
+1       RED: I'll consult Helix Fossil
+1       RED: Hey, Twitch chat!
+0       RED: Tell TASBot to be happy.
+2    TASBot: I do not understand this word [[_:_:]] Happy.
 0   TASBotT: I do not understand this word "Happy".
-3       RED: Twith chat just totally played TASBot!
-5       RED: Training Twitch Chat was super effective!
+3       RED: Twith chat, guess what?
+3       RED: You just "played" TASBot!
+2       RED: Training Twitch Chat...
+1       RED: ...was super effective!
 5    TASBot: [[aI dId n''0:t laIk Daat tr'Ik]].
 0   TASBotT: I did not like that trick.
-3  dwangoAC: TASBot, how can you like and dislike things but not know how to be happy?
-5       RED: TASBot is broken, he does not understand emotion.
+0  dwangoAC: TASBot, how can you like and dislike things but not know how to be happy?
+2       RED: TASBot is broken
+1       RED: He doesn't have emotions
 5    TASBot: [[aIa#m p3:f'Ekt]]. [['EvrI2T,IN aI d'u: m''Vst bi: p3:f'Ekt]]
 0   TASBotT: I am perfect. Everything I do must be perfect.
-5       RED: Oh yeah? Go look at TASVideos.org
+3       RED: Oh yeah?
+0       RED: Look at TASVideos.org
 1       RED: ShiftPalette
+3    TASBot: This website is [[p3:f'Ekt]].
+0   TASBotT: This website is perfect.
 5       RED: ShiftPalette
-5       RED: I bet *something* there isn't perfect.
-5    TASBot: This website is not [[p3:f'Ekt]]. There is too much purple.
-0   TASBotT: This website is not perfect. There is too much purple.
-5       RED: And what are you going to do about it, bugeyes?
-5    TASBot: I will make it [[p3:f'Ekt]].
-0   TASBotT: I will make it perfect.
-3  dwangoAC: But I like the site the way it is!
+5       RED: I think it needs more red.
+3    TASBot: No.
+0   TASBotT: No.
+3       RED: No?
+5    TASBot: I like it this way. It is [[p3:f'Ekt]].
+0   TASBotT: I like it this way, it is perfect.
+3       RED: Make it more red now! 
+5    TASBot: I will show you. It will not be [[p3:f'Ekt]].
+0   TASBotT: I will show you. It will not be perfect.
+0       RED: ShiftPalette
+3    TASBot: See? It is not [[p3:f'Ekt]].
+0   TASBotT: See? It is not perfect.
+0  dwangoAC: How did you do that to the real site?
 1       RED: ShiftPalette
-5    TASBot: I will make it [[p3:f'Ekt]].
-0   TASBotT: I made it perfect.
-1       RED: ShiftPalette
-5       RED: No you didn't, you made it ugly.
-3  dwangoAC: How did you do that to the real site?
-5       RED: Twitch chat, what color should the site be?
+5       RED: Well, fine - hey twitch chat!
+5       RED: What color should the site be?
 5    TASBot: I like [[D'aat]] color.
 0   TASBotT: I like that color.
-1       RED: ShiftPalette
-1       RED: ShiftPalette
 5       RED: Do what Twitch chat wants.
-5    TASBot: No.
+2    TASBot: No.
 0   TASBotT: No.
-5       RED: No?
+2       RED: No?
 3  dwangoAC: Can't you two come to some kind of compromise?
-5       RED: Tell TASBot what color it should be!
-5    TASBot: It will [[n'0t]] be [[p3:f'Ekt]]. You will see.
+1       RED: Tell TASBot what color it should be!
+2    TASBot: It will [[n'0t]] be [[p3:f'Ekt]]. You will see.
+1       RED: ShiftPalette
 0   TASBotT: It will not be perfect. You will see.
-5       RED: That looks like anarchy in action.
+2       RED: That looks like anarchy in action.
+1       RED: ShiftPalette
 3  dwangoAC: Thanks you two, now the site looks like a rainbow threw up on it.
+2       RED: That was fun!
+1       RED: How about...
+5       RED: Twitch plays AGDQ camera!
