@@ -111,12 +111,21 @@ class ScreenPlayThread(Thread):
             if speaker == 'red':
                 self.ircBot.replayQueue.put("<red>:" + text)
                 # self.ircBot.connection.privmsg(IrcChannel, text)
+            if speaker == 'redd':
+                self.ircBot.replayQueue.put("RED:" + text)
             if speaker == 'tasbot':
                 if TasbotPipeEnable:
                     writeToPipe(tasBotPipe, text)
                 if TasbotEspeakEnable:
                     call(['espeak', text])
-
+            if speaker == 'tasbott':
+                self.ircBot.replayQueue.put("TASBot:" + text)
+                # msg = u'TASBot says: {}'.format(text)
+                #self.ircBot.sendMessage(msg)
+            if speaker == 'dwangoac':
+                self.ircBot.replayQueue.put("dwangoAC:" + text)
+                # msg = u'TASBot says: {}'.format(text)
+                #self.ircBot.sendMessage(msg)
 
 class PptIrcBot(irc.client.SimpleIRCClient):
     def __init__(self):
